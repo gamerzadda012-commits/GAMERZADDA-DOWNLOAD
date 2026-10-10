@@ -1,143 +1,115 @@
 (() => {
-  "use strict";
-  const loader = document.getElementById("site-loader");
-  const hideLoader = () => { if (loader) loader.classList.add("done"); };
-  window.addEventListener("load", () => setTimeout(hideLoader, 300), { once: true });
-  setTimeout(hideLoader, 1800);
-
-  const menuButton = document.getElementById("menu-toggle");
-  const nav = document.getElementById("nav-links");
-  if (menuButton && nav) {
-    menuButton.addEventListener("click", () => {
-      const isOpen = nav.classList.toggle("open");
-      menuButton.setAttribute("aria-expanded", String(isOpen));
-      menuButton.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
-      menuButton.textContent = isOpen ? "✕" : "☰";
-    });
-    nav.querySelectorAll("a").forEach(link => link.addEventListener("click", () => {
-      nav.classList.remove("open");
-      menuButton.setAttribute("aria-expanded", "false");
-      menuButton.setAttribute("aria-label", "Open navigation");
-      menuButton.textContent = "☰";
-    }));
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const root = document.documentElement;
+  // Always dismiss the startup loader, even if another feature fails later.
+  function dismissSiteLoader() {
+    const loader = $('site-loader');
+    if (!loader) return;
+    loader.classList.add('done');
+    window.setTimeout(() => { if (loader.isConnected) loader.remove(); }, 600);
   }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dismissSiteLoader, { once: true });
+  else dismissSiteLoader();
+  window.setTimeout(dismissSiteLoader, 1800);
+  const lightThemeButton = $('theme-light');
+  const darkThemeButton = $('theme-dark');
+  const menuButton = $('menu-toggle');
+  const nav = $('nav-links');
+  const year = $('year');
+  const modal = $('download-modal');
+  const closeButton = $('download-close');
+  const progressFill = $('download-progress-fill');
+  const percent = $('download-percent');
+  const sizeLabel = $('download-size');
+  const title = $('download-title');
+  const message = $('download-message');
+  const hint = $('download-hint');
+  const fallback = $('download-fallback');
+  const APK_URL = '/app/downloads/gamerzadda.apk';
+  if (year) year.textContent = String(new Date().getFullYear());
 
-  const modal = document.getElementById("download-modal");
-  const closeButton = document.getElementById("download-close");
-  const title = document.getElementById("download-title");
-  const message = document.getElementById("download-message");
-  const fill = document.getElementById("download-progress-fill");
-  const percent = document.getElementById("download-percent");
-  const sizeLabel = document.getElementById("download-size");
-  const hint = document.getElementById("download-hint");
-  const fallback = document.getElementById("download-fallback");
-  const apkUrl = "/app/downloads/gamerzadda.apk";
-  let activeController = null;
+  function setTheme(theme) {
+    const dark = theme === 'dark';
+    if (dark) root.dataset.theme = 'dark'; else delete root.dataset.theme;
+    root.style.colorScheme = dark ? 'dark' : 'light';
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.setAttribute('content', dark ? '#111321' : '#ff174f');
+    try { localStorage.setItem('gz-theme', dark ? 'dark' : 'light'); } catch (_) {}
+    if (lightThemeButton) lightThemeButton.setAttribute('aria-pressed', String(!dark));
+    if (darkThemeButton) darkThemeButton.setAttribute('aria-pressed', String(dark));
+  }
+  let initialTheme = 'light';
+  try { initialTheme = localStorage.getItem('gz-theme') === 'dark' ? 'dark' : 'light'; } catch (_) {}
+  setTheme(root.dataset.theme === 'dark' ? 'dark' : initialTheme);
+  lightThemeButton?.addEventListener('click', () => setTheme('light'));
+  darkThemeButton?.addEventListener('click', () => setTheme('dark'));
 
-  const bytes = n => {
-    if (!Number.isFinite(n) || n < 0) return "Size unknown";
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(2)} MB`;
-  };
-  const showModal = () => {
-    if (!modal) return;
-    modal.classList.add("open");
-    modal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  };
-  const closeModal = () => {
-    if (!modal) return;
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-    if (activeController) activeController.abort();
-  };
-  closeButton?.addEventListener("click", closeModal);
-  modal?.addEventListener("click", e => { if (e.target === modal) closeModal(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+  menuButton?.addEventListener('click', () => {
+    const open = nav?.classList.toggle('open') || false;
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    menuButton.textContent = open ? '×' : '☰';
+  });
+  nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    nav.classList.remove('open'); menuButton?.setAttribute('aria-expanded', 'false');
+    if (menuButton) { menuButton.textContent = '☰'; menuButton.setAttribute('aria-label', 'Open navigation'); }
+  }));
 
-  async function downloadApk() {
-    showModal();
+  function openModal() {
+    if (!modal) return false;
+    modal.hidden = false; modal.setAttribute('aria-hidden', 'false'); modal.classList.add('is-open');
+    document.body.classList.add('modal-open');
+    if (progressFill) progressFill.style.width = '0%';
+    if (percent) percent.textContent = '0%';
+    if (sizeLabel) sizeLabel.textContent = 'Checking file size…';
+    if (title) title.textContent = 'Preparing your download…';
+    if (message) message.textContent = 'Connecting securely to GAMERZADDA APK';
+    if (hint) hint.textContent = 'Keep this window open while the APK downloads.';
     if (fallback) fallback.hidden = true;
-    if (fill) fill.style.width = "0%";
-    if (percent) percent.textContent = "0%";
-    if (sizeLabel) sizeLabel.textContent = "Checking APK size…";
-    if (title) title.textContent = "Preparing your download…";
-    if (message) message.textContent = "Connecting securely to GAMERZADDA APK";
-    if (hint) hint.textContent = "The exact file size and download progress will appear here.";
-    activeController = new AbortController();
+    startDownload(); return true;
+  }
+  function closeModal() { if (!modal) return; modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); modal.hidden = true; document.body.classList.remove('modal-open'); }
+  closeButton?.addEventListener('click', closeModal);
+  modal?.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.querySelectorAll('[data-download]').forEach(link => link.addEventListener('click', e => {
+    if (modal) { e.preventDefault(); openModal(); }
+  }));
+  async function startDownload() {
+    if (!modal) return;
     try {
-      const response = await fetch(apkUrl, { signal: activeController.signal, cache: "no-store" });
-      if (!response.ok) throw new Error(`Download server returned ${response.status}`);
-      const total = Number(response.headers.get("content-length")) || 0;
-      if (title) title.textContent = "Downloading GAMERZADDA…";
-      if (message) message.textContent = total ? `APK size: ${bytes(total)}` : "Downloading APK (server size not provided)";
-      if (!response.body || !response.body.getReader) {
-        const blob = await response.blob();
-        saveBlob(blob);
-        return;
-      }
-      const reader = response.body.getReader();
-      const chunks = [];
-      let received = 0;
+      const response = await fetch(APK_URL, { cache: 'no-store' });
+      if (!response.ok || !response.body?.getReader) throw new Error('Streaming unavailable');
+      const total = Number(response.headers.get('content-length'));
+      const reader = response.body.getReader(); const chunks = []; let received = 0;
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        received += value.byteLength;
-        const p = total ? Math.min(100, Math.round(received / total * 100)) : 0;
-        if (fill) fill.style.width = `${p}%`;
-        if (percent) percent.textContent = total ? `${p}%` : "…";
-        if (sizeLabel) sizeLabel.textContent = `${bytes(received)} / ${total ? bytes(total) : "size unknown"}`;
-        if (message) message.textContent = total ? `Downloading… ${p}% complete` : "Downloading APK…";
+        const {done, value} = await reader.read(); if (done) break;
+        chunks.push(value); received += value.byteLength;
+        if (total > 0) {
+          const p = Math.min(100, received / total * 100);
+          if (progressFill) progressFill.style.width = p + '%';
+          if (percent) percent.textContent = Math.round(p) + '%';
+          if (sizeLabel) sizeLabel.textContent = `${(received/1048576).toFixed(1)} MB / ${(total/1048576).toFixed(1)} MB`;
+          if (title) title.textContent = 'Downloading GAMERZADDA…';
+          if (message) message.textContent = 'Your APK is being downloaded securely.';
+        }
       }
-      const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
-      if (fill) fill.style.width = "100%";
-      if (percent) percent.textContent = "100%";
-      if (sizeLabel) sizeLabel.textContent = `${bytes(received)} / ${bytes(total || received)}`;
-      if (title) title.textContent = "Download ready!";
-      if (message) message.textContent = "Your GAMERZADDA APK has downloaded successfully.";
-      if (hint) hint.textContent = "Your browser should now save the APK file.";
-      saveBlob(blob);
-    } catch (err) {
-      if (err.name === "AbortError") return;
-      if (title) title.textContent = "Download couldn't start";
-      if (message) message.textContent = "Please use the direct download button below or try again.";
-      if (hint) hint.textContent = "Check your connection and try once more.";
+      const blob = new Blob(chunks, {type:'application/vnd.android.package-archive'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = 'gamerzadda.apk'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      if (progressFill) progressFill.style.width = '100%'; if (percent) percent.textContent = '100%';
+      if (title) title.textContent = 'Download ready!'; if (message) message.textContent = 'GAMERZADDA APK download has started.';
+      if (hint) hint.textContent = 'Open the downloaded APK on your Android device to continue installation.';
+    } catch (_) {
+      if (title) title.textContent = 'Continue APK download';
+      if (message) message.textContent = 'Your browser may not support in-page progress. Use the button below to download directly.';
+      if (hint) hint.textContent = 'The direct download opens the APK from the official website.';
       if (fallback) fallback.hidden = false;
-      if (sizeLabel) sizeLabel.textContent = "Unable to read file size";
-      console.error("GAMERZADDA APK download:", err);
+      if (sizeLabel) sizeLabel.textContent = 'Direct download available';
     }
   }
-  function saveBlob(blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "gamerzadda.apk";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  }
-  document.querySelectorAll("[data-download]").forEach(link => {
-    link.addEventListener("click", event => {
-      event.preventDefault();
-      downloadApk();
-    });
-  });
-
-  const year = document.getElementById("year");
-  if (year) year.textContent = new Date().getFullYear();
-  const revealItems = document.querySelectorAll(".reveal");
-  if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    revealItems.forEach(item => observer.observe(item));
-  } else revealItems.forEach(item => item.classList.add("visible"));
+  // If a browser doesn't support streaming, keep the direct-download fallback visible.
+  document.querySelectorAll('.download-retry').forEach(a => a.href = APK_URL);
 })();

@@ -841,18 +841,554 @@ html, body {
 }
 
 
-/* Use the real GAMERZADDA logo image in the central hero clay card */
-.brand-gz-image{
-  display:block;
-  width:108px;
-  height:108px;
-  flex:0 0 108px;
-  object-fit:contain;
-  border-radius:25px;
-  background:transparent;
-  box-shadow:9px 9px 20px #c7cddd,-6px -6px 15px #fff;
-  transform:translateZ(0);
+/* GAMERZADDA: subtle animated ambient background (keeps the existing layout intact) */
+body{isolation:isolate;position:relative}
+body:before{
+  content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 14% 18%,rgba(255,23,79,.105),transparent 28%),
+    radial-gradient(ellipse at 82% 26%,rgba(65,105,255,.105),transparent 31%),
+    radial-gradient(ellipse at 65% 83%,rgba(19,184,121,.09),transparent 30%);
+  background-size:140% 140%;animation:gz-ambient-drift 22s ease-in-out infinite alternate;
+  opacity:.85;will-change:background-position,transform
+}
+@keyframes gz-ambient-drift{
+  0%{background-position:0% 10%;transform:translate3d(-1%,0,0) scale(1)}
+  50%{background-position:70% 45%;transform:translate3d(1%,1%,0) scale(1.025)}
+  100%{background-position:100% 90%;transform:translate3d(0,-1%,0) scale(1)}
+}
+.header-actions{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.theme-toggle{
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  height:40px;padding:4px;border:1px solid rgba(125,135,160,.24);
+  border-radius:999px;background:rgba(255,255,255,.82);color:#30364a;
+  box-shadow:0 6px 18px rgba(40,48,80,.10),inset 0 1px 0 rgba(255,255,255,.8);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:background .25s,border-color .25s,box-shadow .25s
+}
+.theme-choice{
+  display:grid;place-items:center;width:32px;height:30px;padding:0;border:0;border-radius:999px;
+  background:transparent;color:#68738b;font-size:17px;line-height:1;cursor:pointer;
+  transition:background .22s,color .22s,transform .22s,box-shadow .22s
+}
+.theme-choice:hover{transform:translateY(-1px);color:#ff174f}
+.theme-choice:focus-visible{outline:2px solid #ff4776;outline-offset:2px}
+.theme-light-choice[aria-pressed="true"]{color:#9b6200;background:linear-gradient(135deg,#fff0ad,#ffd36b);box-shadow:0 2px 8px rgba(239,170,24,.25)}
+.theme-dark-choice[aria-pressed="true"]{color:#fff;background:linear-gradient(135deg,#4b5275,#171a2b);box-shadow:0 2px 9px rgba(12,15,30,.28)}
+html[data-theme="dark"] .theme-toggle{background:rgba(22,25,42,.92);border-color:#414760;box-shadow:0 6px 18px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04)}
+html[data-theme="dark"] .theme-light-choice{color:#aab2c8}
+html[data-theme="dark"] .theme-dark-choice[aria-pressed="true"]{color:#ffe7a0;background:linear-gradient(135deg,#383f61,#24283d);box-shadow:0 2px 9px rgba(0,0,0,.3)}
+@media(max-width:850px){.theme-toggle{height:36px}.theme-choice{width:28px;height:27px;font-size:15px}}
+html[data-theme="dark"] body{color:#eef1fb;background:linear-gradient(135deg,#101321 0%,#17182b 52%,#10231f 100%)!important;background-attachment:fixed!important}
+html[data-theme="dark"] body:before{opacity:.55;background:
+ radial-gradient(ellipse at 14% 18%,rgba(255,23,79,.17),transparent 28%),
+ radial-gradient(ellipse at 82% 26%,rgba(65,105,255,.18),transparent 31%),
+ radial-gradient(ellipse at 65% 83%,rgba(19,184,121,.14),transparent 30%)}
+html[data-theme="dark"] .site-header{background:rgba(16,19,33,.84)!important;border-color:rgba(255,255,255,.09)!important;box-shadow:0 8px 30px rgba(0,0,0,.22)!important}
+html[data-theme="dark"] .nav-links>a:not(.nav-download){color:#c5cbdb}
+html[data-theme="dark"] .nav-links{color:#edf0fa}
+html[data-theme="dark"] .nav-links.open{background:#15182a!important;border-color:#34384c!important}
+html[data-theme="dark"] .menu-toggle{color:#f3f5ff}
+html[data-theme="dark"] .hero:before{opacity:.45}
+html[data-theme="dark"] .eyebrow{background:#351b2a;border-color:#593044;color:#ff8daa}
+html[data-theme="dark"] .hero-lead,
+html[data-theme="dark"] .hero-note,
+html[data-theme="dark"] .section-heading p,
+html[data-theme="dark"] .feature-card p,
+html[data-theme="dark"] .promo-panel p,
+html[data-theme="dark"] .steps-grid p,
+html[data-theme="dark"] .faq-list p,
+html[data-theme="dark"] .cta-inner p{color:#b5bdd0}
+html[data-theme="dark"] .hero-strip{background:rgba(25,29,48,.58)!important;border-color:#343950!important;color:#aeb8ce}
+html[data-theme="dark"] .hero-strip b{color:#edf1ff}
+html[data-theme="dark"] .hero-pills span{background:linear-gradient(145deg,#24283d,#1a1e30)!important;color:#e7ebf8;box-shadow:5px 5px 12px #0b0d17,-4px -4px 12px #252a40}
+html[data-theme="dark"] .btn-secondary{background:linear-gradient(145deg,#252a40,#1b2033)!important;border-color:#3a4058!important;color:#f0f2ff;box-shadow:5px 5px 15px #0b0d17,-4px -4px 12px #242941}
+html[data-theme="dark"] .brand-clay-card,
+html[data-theme="dark"] .clay-float,
+html[data-theme="dark"] .feature-card,
+html[data-theme="dark"] .steps-grid article,
+html[data-theme="dark"] .reward-tile,
+html[data-theme="dark"] .promo-panel,
+html[data-theme="dark"] .withdrawal-card,
+html[data-theme="dark"] .payment-assets-card,
+html[data-theme="dark"] .social-btn{
+  background:linear-gradient(145deg,rgba(35,39,59,.97),rgba(24,28,44,.96))!important;
+  border-color:rgba(255,255,255,.09)!important;
+  box-shadow:8px 10px 28px rgba(0,0,0,.2)!important;color:#edf0fb
+}
+html[data-theme="dark"] .brand-clay-word,
+html[data-theme="dark"] .feature-card h3,
+html[data-theme="dark"] .promo-panel h2,
+html[data-theme="dark"] .steps-grid h3,
+html[data-theme="dark"] .withdrawal-copy h2,
+html[data-theme="dark"] .social-container h2{color:#f4f5ff}
+html[data-theme="dark"] .brand-clay-card small,
+html[data-theme="dark"] .clay-float small,
+html[data-theme="dark"] .social-subtitle{color:#aeb6ca}
+html[data-theme="dark"] .clay-float>span,
+html[data-theme="dark"] .feature-icon,
+html[data-theme="dark"] .social-icon-wrap{filter:brightness(.83) saturate(.9)}
+html[data-theme="dark"] .orb-pink{background:linear-gradient(145deg,#34263a,#392236);box-shadow:12px 12px 34px #0c0e18,-8px -8px 24px #22253a}
+html[data-theme="dark"] .orb-blue{background:linear-gradient(145deg,#272d49,#1b2940);box-shadow:12px 12px 30px #0c0e18,-8px -8px 24px #22263a}
+html[data-theme="dark"] .orb-green{background:linear-gradient(145deg,#1b3c36,#192b31);box-shadow:12px 12px 30px #0c0e18,-8px -8px 24px #22263a}
+html[data-theme="dark"] .promo-tournament{background:linear-gradient(130deg,#202943,#292139 65%,#321e2c)!important}
+html[data-theme="dark"] .promo-rewards{background:linear-gradient(130deg,#30202e,#22243b 60%,#17342e)!important}
+html[data-theme="dark"] .rewards-band{background:linear-gradient(120deg,#251c2d,#1d2037 53%,#142e28)!important}
+html[data-theme="dark"] .fair-section{background:linear-gradient(125deg,#090b15,#11172b 60%,#0d2924)!important}
+html[data-theme="dark"] .faq-list details{border-color:#34384c}
+html[data-theme="dark"] .faq-list summary{color:#f0f2ff}
+html[data-theme="dark"] .download-cta{background:linear-gradient(110deg,#291b2a,#1b2139)!important}
+html[data-theme="dark"] .site-footer{background:#080a12!important}
+html[data-theme="dark"] .social-section{background:linear-gradient(180deg,#15182a 0%,#201a2a 100%)!important;border-color:#34384c!important}
+html[data-theme="dark"] .social-tag{background:#351b2a;border-color:#563045;color:#ff8daa}
+html[data-theme="dark"] .social-container>p{color:#b5bdd0}
+html[data-theme="dark"] .social-arrow{color:var(--social-accent)}
+html[data-theme="dark"] .withdrawal-copy p,
+html[data-theme="dark"] .withdrawal-disclaimer,
+html[data-theme="dark"] .payment-assets-heading small,
+html[data-theme="dark"] .payment-assets-footer{color:#b5bdd0}
+html[data-theme="dark"] .payment-logo-tile{background:#f9faff}
+html[data-theme="dark"] .download-dialog{background:linear-gradient(145deg,#25283d,#171a2b)!important;color:#f2f4ff;border-color:#42465d}
+html[data-theme="dark"] .download-dialog>p,
+html[data-theme="dark"] .download-progress-meta span,
+html[data-theme="dark"] .download-dialog .download-hint{color:#b7bfd2}
+html[data-theme="dark"] .download-close{background:#30354c;color:#fff;border-color:#42465d}
+html[data-theme="dark"] .download-progress-track{background:#111321;box-shadow:inset 4px 4px 8px #090b13,inset -3px -3px 7px #292d42}
+html[data-theme="dark"] .mobile-download{z-index:80}
+html[data-theme="dark"] .legal-note{color:#7f899f}
+@media(max-width:850px){
+ .header-actions{gap:9px}
+ .site-header{gap:10px}
+ .theme-toggle{height:35px}
 }
 @media(max-width:560px){
-  .brand-gz-image{width:82px;height:82px;flex-basis:82px;border-radius:22px}
+ .header-actions{gap:8px}
+ .theme-toggle{height:33px;padding:3px}
+ .theme-choice{width:26px;height:25px;font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){body:before{animation:none!important}}
+
+
+/* TEXT VISIBILITY FIX ONLY — preserve existing light/dark theme backgrounds and layout */
+/* Light mode: increase contrast of secondary copy without changing the theme design. */
+html:not([data-theme="dark"]) .hero-lead,
+html:not([data-theme="dark"]) .hero-note,
+html:not([data-theme="dark"]) .section-heading p,
+html:not([data-theme="dark"]) .feature-card p,
+html:not([data-theme="dark"]) .promo-panel p,
+html:not([data-theme="dark"]) .steps-grid p,
+html:not([data-theme="dark"]) .faq-list p,
+html:not([data-theme="dark"]) .cta-inner p,
+html:not([data-theme="dark"]) .social-subtitle,
+html:not([data-theme="dark"]) .payment-assets-heading small,
+html:not([data-theme="dark"]) .payment-assets-footer,
+html:not([data-theme="dark"]) .legal-note {
+  color: #535d70;
+}
+html:not([data-theme="dark"]) .brand-clay-card small,
+html:not([data-theme="dark"]) .clay-float small {
+  color: #596174;
+}
+
+/* Dark mode: force readable foreground colors on all important content. */
+html[data-theme="dark"] .hero h1,
+html[data-theme="dark"] .section-heading h2,
+html[data-theme="dark"] .rewards-layout h2,
+html[data-theme="dark"] .fair-layout h2,
+html[data-theme="dark"] .cta-inner h2,
+html[data-theme="dark"] .feature-card h3,
+html[data-theme="dark"] .steps-grid h3,
+html[data-theme="dark"] .faq-list summary,
+html[data-theme="dark"] .withdrawal-copy h2,
+html[data-theme="dark"] .payment-assets-heading b,
+html[data-theme="dark"] .social-name,
+html[data-theme="dark"] .brand-clay-word,
+html[data-theme="dark"] .footer-brand,
+html[data-theme="dark"] .footer-links a {
+  color: #f7f8ff;
+}
+html[data-theme="dark"] .hero-lead,
+html[data-theme="dark"] .hero-note,
+html[data-theme="dark"] .section-heading p,
+html[data-theme="dark"] .feature-card p,
+html[data-theme="dark"] .promo-panel p,
+html[data-theme="dark"] .steps-grid p,
+html[data-theme="dark"] .faq-list p,
+html[data-theme="dark"] .cta-inner p,
+html[data-theme="dark"] .social-subtitle,
+html[data-theme="dark"] .brand-clay-card small,
+html[data-theme="dark"] .clay-float small,
+html[data-theme="dark"] .payment-assets-heading small,
+html[data-theme="dark"] .payment-assets-footer,
+html[data-theme="dark"] .withdrawal-disclaimer,
+html[data-theme="dark"] .footer-main > p,
+html[data-theme="dark"] .footer-bottom,
+html[data-theme="dark"] .legal-note {
+  color: #c6cde0 !important;
+}
+html[data-theme="dark"] .social-btn,
+html[data-theme="dark"] .social-btn .social-name,
+html[data-theme="dark"] .social-btn .social-subtitle {
+  color: #f7f8ff !important;
+}
+html[data-theme="dark"] .social-btn .social-subtitle { color: #c6cde0 !important; }
+html[data-theme="dark"] .hero-strip,
+html[data-theme="dark"] .hero-pills span,
+html[data-theme="dark"] .hero-visual .float-card,
+html[data-theme="dark"] .hero-visual .reward-spin,
+html[data-theme="dark"] .hero-visual .reward-signup,
+html[data-theme="dark"] .hero-visual .reward-free,
+html[data-theme="dark"] .hero-visual .reward-scratch,
+html[data-theme="dark"] .hero-visual .reward-refer,
+html[data-theme="dark"] .hero-visual .reward-voucher {
+  color: #f2f4ff;
+}
+html[data-theme="dark"] .hero-visual small,
+html[data-theme="dark"] .hero-visual p,
+html[data-theme="dark"] .hero-visual b,
+html[data-theme="dark"] .hero-visual span {
+  text-shadow: 0 1px 2px rgba(0,0,0,.22);
+}
+
+
+/* TARGETED DARK-MODE TEXT FIX: hero Explore Features + floating prize/reward cards only */
+html[data-theme="dark"] .hero-actions .btn-secondary {
+  color: #f7f8ff !important;
+  -webkit-text-fill-color: #f7f8ff !important;
+}
+html[data-theme="dark"] .hero-actions .btn-secondary span {
+  color: #f7f8ff !important;
+  -webkit-text-fill-color: #f7f8ff !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float b {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float small {
+  color: #e2e7f5 !important;
+  -webkit-text-fill-color: #e2e7f5 !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float {
+  color: #ffffff !important;
+}
+
+
+/* FINAL TARGETED FIX: make every floating hero badge label readable in both themes.
+   Only text/icon visibility is changed; card backgrounds, positions and layout stay untouched. */
+html[data-theme="dark"] .hero-visual .clay-float b,
+html[data-theme="dark"] .hero-visual .clay-float small {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float small { color: #e6ebf7 !important; -webkit-text-fill-color: #e6ebf7 !important; }
+html:not([data-theme="dark"]) .hero-visual .clay-float b {
+  color: #172033 !important; -webkit-text-fill-color: #172033 !important;
+  opacity: 1 !important; visibility: visible !important;
+}
+html:not([data-theme="dark"]) .hero-visual .clay-float small {
+  color: #4d586d !important; -webkit-text-fill-color: #4d586d !important;
+  opacity: 1 !important; visibility: visible !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float .reward-float-icon,
+html:not([data-theme="dark"]) .hero-visual .clay-float .reward-float-icon {
+  opacity: 1 !important; visibility: visible !important; filter: none !important;
+}
+
+/* TARGETED FIX: all six floating reward labels must remain readable in both themes.
+   Does not alter the theme toggle, backgrounds, positions, or layout. */
+.hero-visual .clay-float.reward-spin,
+.hero-visual .clay-float.reward-signup,
+.hero-visual .clay-float.reward-free,
+.hero-visual .clay-float.reward-scratch,
+.hero-visual .clay-float.reward-refer,
+.hero-visual .clay-float.reward-voucher {
+  color: #172033 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: #172033;
+}
+.hero-visual .clay-float.reward-spin b,
+.hero-visual .clay-float.reward-signup b,
+.hero-visual .clay-float.reward-free b,
+.hero-visual .clay-float.reward-scratch b,
+.hero-visual .clay-float.reward-refer b,
+.hero-visual .clay-float.reward-voucher b {
+  display: inline !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-shadow: none !important;
+}
+.hero-visual .clay-float.reward-spin small,
+.hero-visual .clay-float.reward-signup small,
+.hero-visual .clay-float.reward-free small,
+.hero-visual .clay-float.reward-scratch small,
+.hero-visual .clay-float.reward-refer small,
+.hero-visual .clay-float.reward-voucher small {
+  display: inline !important;
+  color: #4d586d !important;
+  -webkit-text-fill-color: #4d586d !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-shadow: none !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float.reward-spin,
+html[data-theme="dark"] .hero-visual .clay-float.reward-signup,
+html[data-theme="dark"] .hero-visual .clay-float.reward-free,
+html[data-theme="dark"] .hero-visual .clay-float.reward-scratch,
+html[data-theme="dark"] .hero-visual .clay-float.reward-refer,
+html[data-theme="dark"] .hero-visual .clay-float.reward-voucher,
+html[data-theme="dark"] .hero-visual .clay-float.reward-spin b,
+html[data-theme="dark"] .hero-visual .clay-float.reward-signup b,
+html[data-theme="dark"] .hero-visual .clay-float.reward-free b,
+html[data-theme="dark"] .hero-visual .clay-float.reward-scratch b,
+html[data-theme="dark"] .hero-visual .clay-float.reward-refer b,
+html[data-theme="dark"] .hero-visual .clay-float.reward-voucher b {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float.reward-spin small,
+html[data-theme="dark"] .hero-visual .clay-float.reward-signup small,
+html[data-theme="dark"] .hero-visual .clay-float.reward-free small,
+html[data-theme="dark"] .hero-visual .clay-float.reward-scratch small,
+html[data-theme="dark"] .hero-visual .clay-float.reward-refer small,
+html[data-theme="dark"] .hero-visual .clay-float.reward-voucher small {
+  color: #e6ebf7 !important;
+  -webkit-text-fill-color: #e6ebf7 !important;
+}
+
+
+/* FINAL ROOT CAUSE FIX: the generic .clay-float > span rule was styling BOTH
+   the emoji and the text wrapper. Reset the text wrapper so labels render. */
+.hero-visual .clay-float > span:not(.reward-float-icon) {
+  grid-row: auto !important;
+  grid-column: 2 !important;
+  display: block !important;
+  place-items: initial !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: inherit !important;
+  line-height: 1.25 !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.hero-visual .clay-float .reward-float-icon {
+  grid-row: 1 / 3 !important;
+  grid-column: 1 !important;
+  display: grid !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.hero-visual .clay-float b,
+.hero-visual .clay-float small {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-shadow: none !important;
+}
+.hero-visual .clay-float b {
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+}
+.hero-visual .clay-float small {
+  margin-top: 3px !important;
+  color: #4d586d !important;
+  -webkit-text-fill-color: #4d586d !important;
+  font-size: 7px !important;
+  line-height: 1.25 !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float b {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html[data-theme="dark"] .hero-visual .clay-float small {
+  color: #e6ebf7 !important;
+  -webkit-text-fill-color: #e6ebf7 !important;
+}
+@media (max-width: 760px) {
+  .hero-visual .clay-float b { font-size: 7.5px !important; }
+  .hero-visual .clay-float small { font-size: 6.4px !important; }
+}
+
+/* GAMERZADDA floating-card alignment patch: preserve theme colours and card positions. */
+.hero-visual .clay-float {
+  box-sizing: border-box !important;
+  text-align: left !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  overflow: visible !important;
+}
+
+/* Reward badges use a dedicated icon column and a clean two-line text column. */
+.hero-visual .clay-float.reward-spin,
+.hero-visual .clay-float.reward-signup,
+.hero-visual .clay-float.reward-free,
+.hero-visual .clay-float.reward-scratch,
+.hero-visual .clay-float.reward-refer,
+.hero-visual .clay-float.reward-voucher {
+  display: grid !important;
+  grid-template-columns: 22px minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+  column-gap: 7px !important;
+  row-gap: 0 !important;
+  align-content: center !important;
+  justify-content: stretch !important;
+  text-align: left !important;
+  padding: 9px 10px !important;
+}
+.hero-visual .clay-float.reward-spin > .reward-float-icon,
+.hero-visual .clay-float.reward-signup > .reward-float-icon,
+.hero-visual .clay-float.reward-free > .reward-float-icon,
+.hero-visual .clay-float.reward-scratch > .reward-float-icon,
+.hero-visual .clay-float.reward-refer > .reward-float-icon,
+.hero-visual .clay-float.reward-voucher > .reward-float-icon {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  margin: 0 !important;
+}
+.hero-visual .clay-float.reward-spin > span:not(.reward-float-icon),
+.hero-visual .clay-float.reward-signup > span:not(.reward-float-icon),
+.hero-visual .clay-float.reward-free > span:not(.reward-float-icon),
+.hero-visual .clay-float.reward-scratch > span:not(.reward-float-icon),
+.hero-visual .clay-float.reward-refer > span:not(.reward-float-icon),
+.hero-visual .clay-float.reward-voucher > span:not(.reward-float-icon) {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+.hero-visual .clay-float.reward-spin b,
+.hero-visual .clay-float.reward-signup b,
+.hero-visual .clay-float.reward-free b,
+.hero-visual .clay-float.reward-scratch b,
+.hero-visual .clay-float.reward-refer b,
+.hero-visual .clay-float.reward-voucher b,
+.hero-visual .clay-float.reward-spin small,
+.hero-visual .clay-float.reward-signup small,
+.hero-visual .clay-float.reward-free small,
+.hero-visual .clay-float.reward-scratch small,
+.hero-visual .clay-float.reward-refer small,
+.hero-visual .clay-float.reward-voucher small {
+  position: static !important;
+  float: none !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  line-height: 1.25 !important;
+  transform: none !important;
+}
+.hero-visual .clay-float.reward-spin b,
+.hero-visual .clay-float.reward-signup b,
+.hero-visual .clay-float.reward-free b,
+.hero-visual .clay-float.reward-scratch b,
+.hero-visual .clay-float.reward-refer b,
+.hero-visual .clay-float.reward-voucher b { font-size: 8px !important; }
+.hero-visual .clay-float.reward-spin small,
+.hero-visual .clay-float.reward-signup small,
+.hero-visual .clay-float.reward-free small,
+.hero-visual .clay-float.reward-scratch small,
+.hero-visual .clay-float.reward-refer small,
+.hero-visual .clay-float.reward-voucher small { font-size: 6.8px !important; }
+
+/* The two original tournament/reward badges have no wrapper around their text. */
+.hero-visual .clay-float.float-top,
+.hero-visual .clay-float.float-bottom {
+  display: grid !important;
+  grid-template-columns: 18px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 6px !important;
+  row-gap: 2px !important;
+  align-content: center !important;
+  text-align: left !important;
+  padding: 8px 10px !important;
+}
+.hero-visual .clay-float.float-top > span:first-child,
+.hero-visual .clay-float.float-bottom > span:first-child {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  margin: 0 !important;
+}
+.hero-visual .clay-float.float-top > b,
+.hero-visual .clay-float.float-bottom > b,
+.hero-visual .clay-float.float-top > small,
+.hero-visual .clay-float.float-bottom > small {
+  grid-column: 2 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  line-height: 1.25 !important;
+}
+.hero-visual .clay-float.float-top > b,
+.hero-visual .clay-float.float-bottom > b { grid-row: 1 !important; }
+.hero-visual .clay-float.float-top > small,
+.hero-visual .clay-float.float-bottom > small { grid-row: 2 !important; }
+@media (max-width: 760px) {
+  .hero-visual .clay-float.reward-spin,
+  .hero-visual .clay-float.reward-signup,
+  .hero-visual .clay-float.reward-free,
+  .hero-visual .clay-float.reward-scratch,
+  .hero-visual .clay-float.reward-refer,
+  .hero-visual .clay-float.reward-voucher { column-gap: 5px !important; padding: 7px !important; }
+  .hero-visual .clay-float.reward-spin b,
+  .hero-visual .clay-float.reward-signup b,
+  .hero-visual .clay-float.reward-free b,
+  .hero-visual .clay-float.reward-scratch b,
+  .hero-visual .clay-float.reward-refer b,
+  .hero-visual .clay-float.reward-voucher b { font-size: 7.4px !important; }
+  .hero-visual .clay-float.reward-spin small,
+  .hero-visual .clay-float.reward-signup small,
+  .hero-visual .clay-float.reward-free small,
+  .hero-visual .clay-float.reward-scratch small,
+  .hero-visual .clay-float.reward-refer small,
+  .hero-visual .clay-float.reward-voucher small { font-size: 6.2px !important; }
 }
