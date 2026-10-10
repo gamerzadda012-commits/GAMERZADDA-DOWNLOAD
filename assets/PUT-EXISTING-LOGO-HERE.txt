@@ -1,0 +1,1 @@
+Copy your existing gamerzadda-logo.png into this folder. Keep the filename exactly gamerzadda-logo.png.
